@@ -7,8 +7,13 @@ import mlflow.sklearn
 import numpy as np
 import joblib
 from src.datascience.entity.config_entity import ModelEvaluationConfig
+from src.datascience.constants import *
+from src.datascience.utils.common import read_yaml, create_directories,save_json
 
-
+import os
+os.environ["MLFLOW_TRACKING_URI"]="https://dagshub.com/jilee2189/datascienceproject.mlflow"
+os.environ["MLFLOW_TRACKING_USERNAME"]="jilee2189"
+os.environ["MLFLOW_TRACKING_PASSWORD"]="517702dbe40e32030a3442db16c66e18c7da197b"
 
 class ModelEvaluation:
     def __init__(self, config: ModelEvaluationConfig):
@@ -30,7 +35,7 @@ class ModelEvaluation:
 
 
         mlflow.set_registry_uri(self.config.mlflow_uri)
-        tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
+        #tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
 
         with mlflow.start_run():
 
@@ -50,13 +55,19 @@ class ModelEvaluation:
 
 
             # Model registry does not work with file store
-            if tracking_url_type_store != "file":
+            #if tracking_url_type_store != "file":
 
                 # Register the model
                 # There are other ways to use the Model Registry, which depends on the use case,
                 # please refer to the doc for more information:
                 # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-                mlflow.sklearn.log_model(model, "model", registered_model_name="ElasticnetModel")
-            else:
-                mlflow.sklearn.log_model(model, "model")
+
+                #mlflow.sklearn.log_model(model, "model", registered_model_name="ElasticnetModel")
+            #else:
+            #mlflow.sklearn.log_model(model, "model")
+            model_output_path = os.path.join("artifacts", "model_evaluation", "model.joblib")
+            joblib.dump(model, model_output_path)
+
+        # ✅ Log model manually as artifact (this works on DagsHub)
+            mlflow.log_artifact(model_output_path, artifact_path="model")
     
